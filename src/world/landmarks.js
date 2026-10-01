@@ -48,37 +48,72 @@ function shadeHex(hex, k) {
   return '#' + c.getHexString();
 }
 
-// 切妻屋根（頂点色）
-function gableRoof(v, x0, z0, x1, z1, y, rise, color, axis = 'x', ov = 0.5) {
-  const g = new THREE.BufferGeometry();
-  const pos = [];
-  if (axis === 'x') {
-    const zm = (z0 + z1) / 2;
-    const a = [x0 - ov, y, z1 + ov];
-    const b = [x1 + ov, y, z1 + ov];
-    const c = [x1 + ov, y + rise, zm];
-    const d = [x0 - ov, y + rise, zm];
-    const e = [x1 + ov, y, z0 - ov];
-    const f = [x0 - ov, y, z0 - ov];
-    pos.push(...a, ...b, ...c, ...a, ...c, ...d, ...e, ...f, ...d, ...e, ...d, ...c);
-    // 妻
-    pos.push(x1, y, z1, x1, y, z0, x1, y + rise, zm, x0, y, z0, x0, y, z1, x0, y + rise, zm);
-  } else {
-    const xm = (x0 + x1) / 2;
-    const a = [x1 + ov, y, z1 + ov];
-    const b = [x1 + ov, y, z0 - ov];
-    const c = [xm, y + rise, z0 - ov];
-    const d = [xm, y + rise, z1 + ov];
-    const e = [x0 - ov, y, z0 - ov];
-    const f = [x0 - ov, y, z1 + ov];
-    pos.push(...a, ...b, ...c, ...a, ...c, ...d, ...e, ...f, ...d, ...e, ...d, ...c);
-    pos.push(x0, y, z1, x1, y, z1, xm, y + rise, z1, x1, y, z0, x0, y, z0, xm, y + rise, z0);
+// 切妻屋根（頂点色）。屋根は厚み t の板として作り、軒下や吹き抜けの中から見上げても下面が見えるようにする。
+// 上面の形（当たり判定の gable と合わせてある）は変えず、下面・小口・妻の内側・妻と下面のすき間をふさぐ帯を足す
+function gableRoof(v, x0, z0, x1, z1, y, rise, color, axis = 'x', ov = 0.5, underColor = null) {
+  // ローカル座標：u＝棟の向き、w＝棟と直角。axis 'z' は x と z を入れ替えて置く
+  const [u0, u1, w0, w1] = axis === 'x' ? [x0, x1, z0, z1] : [z0, z1, x0, x1];
+  const W = axis === 'x' ? (u, yy, w) => [u, yy, w] : (u, yy, w) => [w, yy, u];
+  const t = 0.12;
+  const wm = (w0 + w1) / 2;
+  const hw = (w1 - w0) / 2 + ov;
+  const ua = u0 - ov;
+  const ub = u1 + ov;
+  const yr = y + rise;
+  // 壁の線（w0・w1）での屋根の下面の高さ
+  const yu = Math.max(y, y + (rise * ov) / hw - t);
+  const outer = [];
+  const inner = [];
+  // 凸多角形を扇形に分け、各三角形の表が法線 n（ローカル座標）を向くように積む
+  const face = (arr, pts, n) => {
+    const P = pts.map((q) => W(...q));
+    const N = W(...n);
+    for (let i = 1; i + 1 < P.length; i++) {
+      const a = P[0];
+      const b = P[i];
+      const c = P[i + 1];
+      const ex = b[0] - a[0], ey = b[1] - a[1], ez = b[2] - a[2];
+      const fx = c[0] - a[0], fy = c[1] - a[1], fz = c[2] - a[2];
+      const cx = ey * fz - ez * fy;
+      const cy = ez * fx - ex * fz;
+      const cz = ex * fy - ey * fx;
+      if (cx * cx + cy * cy + cz * cz < 1e-10) continue;
+      if (cx * N[0] + cy * N[1] + cz * N[2] >= 0) arr.push(...a, ...b, ...c);
+      else arr.push(...a, ...c, ...b);
+    }
+  };
+  // 上面（2 枚の斜面）と、その t 下の下面
+  for (const [we, s] of [[w1 + ov, 1], [w0 - ov, -1]]) {
+    face(outer, [[ua, y, we], [ub, y, we], [ub, yr, wm], [ua, yr, wm]], [0, 1, s]);
+    face(inner, [[ua, y - t, we], [ub, y - t, we], [ub, yr - t, wm], [ua, yr - t, wm]], [0, -1, -s]);
+    // 軒先の小口
+    face(outer, [[ua, y - t, we], [ub, y - t, we], [ub, y, we], [ua, y, we]], [0, 0, s]);
+    // 妻側の傾いた縁
+    for (const [uu, su] of [[ua, -1], [ub, 1]]) face(outer, [[uu, y - t, we], [uu, yr - t, wm], [uu, yr, wm], [uu, y, we]], [su, 0, 0]);
   }
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.computeVertexNormals();
-  paint(g, color);
-  // 妻面だけ壁色寄りに
-  v.push(g);
+  // 妻（屋根の下面まで届く五角形）。外側は屋根の色、内側は暗い色
+  for (const [uu, su] of [[u0, -1], [u1, 1]]) {
+    const pent = [[uu, y, w0], [uu, y, w1], [uu, yu, w1], [uu, yr - t, wm], [uu, yu, w0]];
+    face(outer, pent, [su, 0, 0]);
+    face(inner, pent, [-su, 0, 0]);
+  }
+  // 長辺側：壁の線から屋根の下面までのすき間をふさぐ帯（両面）
+  if (yu > y + 1e-3) {
+    for (const [ww, s] of [[w0, -1], [w1, 1]]) {
+      const band = [[u0, y, ww], [u1, y, ww], [u1, yu, ww], [u0, yu, ww]];
+      face(inner, band, [0, 0, s]);
+      face(inner, band, [0, 0, -s]);
+    }
+  }
+  const mk = (arr, hex) => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+    g.computeVertexNormals();
+    return paint(g, hex);
+  };
+  // 下面は日が当たらず暗く沈むので、色は屋根より明るめ（指定がなければ屋根の色を白っぽく寄せる）
+  const under = underColor || '#' + new THREE.Color(color).lerp(new THREE.Color('#f2ece2'), 0.62).getHexString();
+  v.push(mk(outer, color), mk(inner, under));
 }
 
 export function buildLandmarks(plan, ctx) {
@@ -409,6 +444,10 @@ function shrine(s, ctx, rng) {
     const sx0 = hx1;
     ctx.g.hrect(sx1 - stepD, -2.2, sx1, 2.2, y, (x, z) => K(GK.STONE, x, z));
     ctx.g.quad([[sx1, y - (top - CURB) / steps, 2.2], [sx1, y - (top - CURB) / steps, -2.2], [sx1, y, -2.2], [sx1, y, 2.2]], [1, 0, 0], K(GK.STONE, 0, 0));
+    // 段の横の面（地面から踏み面まで石で埋める。ないと横から段の下が透けて見える）
+    const xa = sx1 - stepD;
+    ctx.g.quad([[xa, CURB, 2.2], [sx1, CURB, 2.2], [sx1, y, 2.2], [xa, y, 2.2]], [0, 0, 1], K(GK.STONE, 0, 0));
+    ctx.g.quad([[sx1, CURB, -2.2], [xa, CURB, -2.2], [xa, y, -2.2], [sx1, y, -2.2]], [0, 0, -1], K(GK.STONE, 0, 0));
     ctx.col.box(sx1 - stepD, 0, -2.2, sx1, y, 2.2, { tag: 'step' });
     void sx0;
   }
@@ -426,7 +465,7 @@ function shrine(s, ctx, rng) {
   v.push(box(9, 0.8, 8, sx, top, sz, '#b9b2a6'));
   v.push(box(7, 3.2, 6, sx, top + 0.8, sz, '#8a5a3c'));
   for (const dz of [-2.9, 2.9]) for (const dx of [-3.4, 3.4]) v.push(box(0.35, 3.2, 0.35, sx + dx, top + 0.8, sz + dz, '#b8412f'));
-  gableRoof(v, sx - 3.8, sz - 3.6, sx + 3.8, sz + 3.6, top + 4.0, 2.6, '#4b4f55', 'z', 1.1);
+  gableRoof(v, sx - 3.8, sz - 3.6, sx + 3.8, sz + 3.6, top + 4.0, 2.6, '#4b4f55', 'z', 1.1, '#b07a52');
   v.push(box(1.6, 0.8, 0.9, sx + 4.6, top + 0.8, sz, '#6b4a33'));
   ctx.col.box(sx - 4.5, 0, sz - 4, sx + 4.5, top + 4.0, sz + 4, { tag: 'building' });
   ctx.col.add({ kind: 'gable', minX: sx - 3.8, maxX: sx + 3.8, minZ: sz - 3.6, maxZ: sz + 3.6, minY: top + 3.9, maxY: top + 6.6, gable: { axis: 'z', ridge: sx, half: 3.8, eave: top + 4.0 }, tag: 'roof' });
