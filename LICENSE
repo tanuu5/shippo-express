@@ -1,0 +1,42 @@
+MIT License
+
+Copyright (c) 2026 たぬ
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+Exception: the protagonist character
+
+The MIT License above does not apply to the protagonist character of this game
+(the courier girl with animal ears and a tail). This exception covers the
+character's design and likeness, the code and data that build her 3D model
+(the src/character/ directory), and the images and videos that show her
+(such as those in docs/screenshots/). No license is granted to copy, modify,
+distribute, or use the character in other works. Everything else in this
+repository is licensed under the MIT License above.
+
+例外：主人公のキャラクター
+
+上記の MIT License は、このゲームの主人公のキャラクター（ケモ耳としっぽの配達員の
+女の子）には適用されません。対象外となるのは、キャラクターのデザイン（外見）、その
+3D モデルを組み立てるコードとデータ（src/character/ フォルダ）、キャラクターが写って
+いる画像・動画（docs/screenshots/ のものなど）です。キャラクターの複製・改変・再配布
+や、ほかの作品での利用は許諾していません。それ以外のファイルは、上記の MIT License
+で利用できます。
