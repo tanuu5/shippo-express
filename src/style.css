@@ -848,10 +848,10 @@ button {
   height: 62px;
   font-size: 12px;
 }
+/* ポーズは左の列（お金の下）。上の中央はタイマーと重なるので置かない */
 .tbtn.pause {
-  right: 50%;
-  top: 12px;
-  transform: translateX(50%);
+  left: max(16px, env(safe-area-inset-left));
+  top: 94px;
   width: 40px;
   height: 40px;
   font-size: 14px;
@@ -902,6 +902,24 @@ button {
   }
   .st-bar {
     width: 90px;
+  }
+  /* 縦向きスマホ：ポーズはダッシュのゲージの下、行き先はミニマップとポーズより下に */
+  .tbtn.pause {
+    top: 116px;
+  }
+  .hud-job {
+    top: 164px;
+  }
+  /* タイマーは横の余白を詰めて、右上のミニマップとぶつからないように */
+  .hud-timer {
+    padding: 2px 12px 3px;
+    min-width: 76px;
+  }
+}
+@media (max-width: 400px) {
+  .hud-map {
+    width: 104px;
+    height: 104px;
   }
 }
 @media (pointer: coarse) {

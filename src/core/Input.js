@@ -87,7 +87,8 @@ export class Input {
     this.usingTouch = true;
   }
   addTouchCamera(dx, dy) {
-    this.camDX += dx * 0.008;
+    // 右へスワイプすると右を向く（マウスのドラッグとは逆。スマホのゲームでなじみのある向き）
+    this.camDX -= dx * 0.008;
     this.camDY += dy * 0.005;
     this.lastCamInput = this.time;
   }
