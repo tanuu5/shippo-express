@@ -568,6 +568,10 @@ button {
   background: rgba(60, 45, 45, 0.35);
   backdrop-filter: blur(3px);
 }
+/* 上に別の画面（設定・あそびかた）を開いている間の、下の画面 */
+.modal.under {
+  visibility: hidden;
+}
 .card {
   background: var(--cream);
   border: 4px solid var(--brown);

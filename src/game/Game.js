@@ -368,7 +368,9 @@ export class Game {
     this.input.update(dt);
     const inp = this.input;
     if (inp.pausePressed) {
-      if (this.state === 'playing' || this.state === 'paused' || this.state === 'countdown') this.togglePause();
+      // ポーズ中に「設定」「あそびかた」を開いているときは、まずそれだけを閉じる
+      if (this.state === 'paused' && this.screens.modalStack.length > 1) this.screens.closeModal();
+      else if (this.state === 'playing' || this.state === 'paused' || this.state === 'countdown') this.togglePause();
       else if (this.screens.anyModal() && this.state === 'title') this.screens.closeModal();
     }
     if (this.state === 'result' && this.time - this.resultAt > 1.0) {

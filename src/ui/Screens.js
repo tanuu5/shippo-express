@@ -147,13 +147,21 @@ export class Screens {
   }
 
   openModal(el) {
-    el.classList.remove('hidden');
+    // あとから開いた画面がいちばん上に重なるよう、カウントダウン・フェードの直前（ほかの画面より後ろ）へ移す。
+    // そのままだと HTML の並び順で、ポーズ画面が「設定」「あそびかた」の上にかぶさってしまう
+    this.root.insertBefore(el, this.countdownEl);
+    // 下の画面（ポーズなど）は上の画面を閉じるまで隠す。カードのはみ出しや、背景の暗さ・ぼかしの二重がけを防ぐ
+    const below = this.modalStack[this.modalStack.length - 1];
+    if (below) below.classList.add('under');
+    el.classList.remove('hidden', 'under');
     this.modalStack.push(el);
   }
 
   closeModal() {
     const el = this.modalStack.pop();
     if (el) el.classList.add('hidden');
+    const top = this.modalStack[this.modalStack.length - 1];
+    if (top) top.classList.remove('under');
   }
 
   anyModal() {
@@ -163,7 +171,10 @@ export class Screens {
   showPause(on) {
     if (on) this.openModal(this.pause);
     else {
-      for (const el of this.modalStack) el.classList.add('hidden');
+      for (const el of this.modalStack) {
+        el.classList.add('hidden');
+        el.classList.remove('under');
+      }
       this.modalStack = [];
     }
   }

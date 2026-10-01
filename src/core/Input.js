@@ -108,12 +108,13 @@ export class Input {
     let slidePressed = p.has('KeyC') || p.has('KeyL');
     this.pausePressed = p.has('Escape') || p.has('KeyP');
     this.confirmPressed = p.has('Enter') || p.has('Space');
+    // Q で左、E で右を向く（camDX が正だと視点は左へ回る。マウスドラッグは「画面をつかんで回す」向き）
     if (k.has('KeyQ')) {
-      this.camDX -= 2.2 * dt;
+      this.camDX += 2.2 * dt;
       this.lastCamInput = this.time;
     }
     if (k.has('KeyE')) {
-      this.camDX += 2.2 * dt;
+      this.camDX -= 2.2 * dt;
       this.lastCamInput = this.time;
     }
 
@@ -131,7 +132,8 @@ export class Input {
       const rx = dz(gp.axes[2] || 0);
       const ry = dz(gp.axes[3] || 0);
       if (rx || ry) {
-        this.camDX += rx * 2.6 * dt;
+        // 右スティックを右に倒すと右を向く
+        this.camDX -= rx * 2.6 * dt;
         this.camDY += ry * 1.6 * dt;
         this.lastCamInput = this.time;
       }
