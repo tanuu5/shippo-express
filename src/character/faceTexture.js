@@ -229,26 +229,33 @@ function drawMouth(ctx, kind) {
     ctx.bezierCurveTo(cx - 12, cy + 10, cx + 12, cy + 10, cx + 26, cy - 6);
     ctx.stroke();
   } else if (kind === 'open') {
-    ctx.beginPath();
-    ctx.moveTo(cx - 26, cy - 6);
-    ctx.bezierCurveTo(cx - 15, cy + 27, cx + 15, cy + 27, cx + 26, cy - 6);
-    ctx.closePath();
+    // 浅めの開いた口。あご先の丸みにかからないよう、下へ深くしすぎない
+    const outline = () => {
+      ctx.beginPath();
+      ctx.moveTo(cx - 23, cy - 5);
+      ctx.bezierCurveTo(cx - 13, cy + 20, cx + 13, cy + 20, cx + 23, cy - 5);
+      ctx.closePath();
+    };
+    outline();
     ctx.fillStyle = '#9a4f52';
     ctx.fill();
     ctx.save();
     ctx.clip();
     ctx.fillStyle = '#e88a8c';
     ctx.beginPath();
-    ctx.ellipse(cx, cy + 19, 17, 10, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx, cy + 14, 14, 7, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
+    // 舌を描いたあとは今のパスが舌の楕円なので、口の輪郭を引き直してから線を描く
+    // （そのまま stroke すると、口の下に舌の輪が線でぶら下がって見える）
+    outline();
     ctx.stroke();
     // 小さな八重歯
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.moveTo(cx + 10, cy - 2);
-    ctx.lineTo(cx + 19, cy - 3);
-    ctx.lineTo(cx + 15, cy + 7);
+    ctx.moveTo(cx + 8, cy - 2);
+    ctx.lineTo(cx + 16, cy - 3);
+    ctx.lineTo(cx + 12, cy + 5);
     ctx.closePath();
     ctx.fill();
   } else if (kind === 'o') {

@@ -36,6 +36,10 @@ function skullDeform(x, y, z) {
   const cheek = Math.exp(-(((y + 0.6) / 0.27) ** 2)) * THREE.MathUtils.smoothstep(z, -0.25, 0.35);
   X *= 1 + 0.22 * cheek;
   Z *= 1 + 0.045 * cheek;
+  // あごまわり：頬の下からあご先までをふっくら広げ、あご先をわずかに下げて、首へなめらかにつなぐ
+  const jaw = Math.exp(-(((y + 0.84) / 0.2) ** 2)) * THREE.MathUtils.smoothstep(z, -0.35, 0.25);
+  X *= 1 + 0.1 * jaw;
+  if (y < 0) Y -= 0.005 * THREE.MathUtils.smoothstep(-y, 0.55, 1.0) * THREE.MathUtils.smoothstep(z, -0.2, 0.45);
   return [X, Y, Z];
 }
 
@@ -178,7 +182,8 @@ export class CourierModel {
     const spine = this._joint('spine', hips, 0, 0.08, 0);
     const chest = this._joint('chest', spine, 0, 0.17, 0);
     const neck = this._joint('neck', chest, 0, 0.18, -0.005);
-    this._joint('head', neck, 0, 0.07, 0.005);
+    // 首は短め（あごの下から襟までが少しだけ見える）
+    this._joint('head', neck, 0, 0.062, 0.005);
     for (const [s, sg] of [
       ['L', 1],
       ['R', -1],
@@ -256,7 +261,7 @@ export class CourierModel {
     this._mesh('neck', neck, toonMat(0xeccbc0), j.head);
     // インナーの襟：首に沿って、コートの襟ぐりとのすき間をふさぐ
     const collar = new THREE.CylinderGeometry(0.026, 0.088, 0.1, 24, 2, true);
-    collar.translate(0, 0.186, 0.002);
+    collar.translate(0, 0.19, 0.002);
     this._mesh('innerCollar', collar, toonMat(PALETTE.undershirt, { side: THREE.DoubleSide }), j.chest);
   }
 

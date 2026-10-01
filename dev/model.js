@@ -55,6 +55,7 @@ const VIEWS = {
   face: { pos: [0, 1.33, 0.9], target: [0, 1.31, 0], fov: 25 },
   faceQ: { pos: [0.55, 1.36, 0.7], target: [0, 1.31, 0], fov: 25 },
   faceLow: { pos: [0.04, 1.16, 0.85], target: [0, 1.29, 0], fov: 28 },
+  faceUnder: { pos: [0.02, 1.0, 0.5], target: [0, 1.29, 0], fov: 34 },
   top: { pos: [0, 3.6, 0.6], target: [0, 0.7, 0], fov: 25 },
 };
 function setView(name) {
