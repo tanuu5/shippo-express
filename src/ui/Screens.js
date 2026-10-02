@@ -32,7 +32,7 @@ export class Screens {
     </div>
     <div class="best" id="bestLine"></div>
   </div>
-  <div class="press">Enter / Space でスタート</div>
+  <div class="press">↑↓ でえらんで、Enter / Space（A ボタン）で決定</div>
   <div class="copy">© 2026 たぬ</div>
 </div>
 
@@ -51,7 +51,8 @@ export class Screens {
       <tr><th>ダッシュ</th><td>Shift（RB）… しっぽゲージを使う</td></tr>
       <tr><th>スライディング</th><td>C（B）</td></tr>
       <tr><th>視点</th><td>マウスドラッグ / Q・E（右スティック）</td></tr>
-      <tr><th>ポーズ</th><td>Esc / P</td></tr>
+      <tr><th>ポーズ</th><td>Esc / P（Start）</td></tr>
+      <tr><th>メニュー</th><td>矢印キーでえらぶ・Enter で決定・Esc でもどる（十字キー・A・B）</td></tr>
     </table>
     <p class="tip">ひさし（日よけ）や肉球マークのジャンプ台、車の屋根に乗るとはずむよ！ 屋根の上を渡り歩くのが近道。</p>
     <button class="btn primary" data-act="close">とじる</button>

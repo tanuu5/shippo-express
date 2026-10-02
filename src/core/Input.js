@@ -16,6 +16,9 @@ export class Input {
     this.lastCamInput = -10;
     this.time = 0;
     this.touch = { active: false, stickId: null, sx: 0, sy: 0, x: 0, y: 0, camId: null, cx: 0, cy: 0, jump: false, dash: false, jumpEdge: false, slideEdge: false };
+    // メニュー操作：up/down/left/right は押した瞬間と、押しっぱなしの間の連続入力。ok＝決定、back＝もどる、start＝ゲームパッドの Start
+    this.menu = { up: false, down: false, left: false, right: false, ok: false, back: false, start: false };
+    this._rep = { up: { held: false, t: 0 }, down: { held: false, t: 0 }, left: { held: false, t: 0 }, right: { held: false, t: 0 } };
     this.usingTouch = false;
     this._drag = null;
     this.enabled = true;
@@ -59,6 +62,7 @@ export class Input {
 
   releaseAll() {
     this.keys.clear();
+    for (const r of Object.values(this._rep)) r.held = false;
     this._drag = null;
     this.touch.x = 0;
     this.touch.y = 0;
@@ -119,6 +123,17 @@ export class Input {
       this.lastCamInput = this.time;
     }
 
+    // メニュー操作（キーボード）：矢印キー・WASD で選ぶ、Enter / Space で決定、Backspace でもどる（Esc はポーズと同じ扱い）
+    const held = {
+      up: k.has('ArrowUp') || k.has('KeyW'),
+      down: k.has('ArrowDown') || k.has('KeyS'),
+      left: k.has('ArrowLeft') || k.has('KeyA'),
+      right: k.has('ArrowRight') || k.has('KeyD'),
+    };
+    let menuOk = p.has('Enter') || p.has('Space');
+    let menuBack = p.has('Backspace');
+    let menuStart = false;
+
     // ゲームパッド
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     for (const gp of pads) {
@@ -147,9 +162,39 @@ export class Input {
       if (edge(1) || edge(6)) slidePressed = true;
       if (edge(9)) this.pausePressed = true;
       if (edge(0) || edge(9)) this.confirmPressed = true;
+      // メニュー操作（ゲームパッド）：十字キー・左スティックで選ぶ、A で決定、B でもどる
+      held.up ||= b(12) || ay < -0.5;
+      held.down ||= b(13) || ay > 0.5;
+      held.left ||= b(14) || ax < -0.5;
+      held.right ||= b(15) || ax > 0.5;
+      if (edge(0)) menuOk = true;
+      if (edge(1)) menuBack = true;
+      if (edge(9)) menuStart = true;
       for (let i = 0; i < gp.buttons.length; i++) this._padPrev[i] = b(i);
       break;
     }
+    // 押しっぱなしなら、少し待ってから連続で送る
+    for (const d of ['up', 'down', 'left', 'right']) {
+      const r = this._rep[d];
+      let fire = false;
+      if (held[d]) {
+        if (!r.held) {
+          fire = true;
+          r.t = 0.38;
+        } else {
+          r.t -= dt;
+          if (r.t <= 0) {
+            fire = true;
+            r.t = 0.11;
+          }
+        }
+      }
+      r.held = held[d];
+      this.menu[d] = fire;
+    }
+    this.menu.ok = menuOk;
+    this.menu.back = menuBack;
+    this.menu.start = menuStart;
 
     // タッチ
     if (this.usingTouch) {

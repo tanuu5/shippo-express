@@ -515,6 +515,25 @@ button {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--brown);
 }
+/* ゲームパッド・キーボードで選んでいる項目（マウスを乗せたときと同じ浮き上がり＋ピンクの枠） */
+.btn.gp-focus {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--brown);
+  outline: 4px solid var(--pink);
+  outline-offset: 3px;
+}
+.btn.gp-focus:not(.primary) {
+  background: #fff;
+}
+.btn.primary.gp-focus {
+  outline-color: var(--brown2);
+}
+input[type='range'].gp-focus,
+select.gp-focus {
+  outline: 3px solid var(--pink);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
 .btn.primary {
   background: linear-gradient(180deg, #ffb3cc, #ff8fb1);
   color: #fff;

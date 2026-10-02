@@ -16,6 +16,7 @@ import { Hud } from '../ui/Hud.js';
 import { Minimap } from '../ui/Minimap.js';
 import { Screens } from '../ui/Screens.js';
 import { TouchControls } from '../ui/TouchControls.js';
+import { MenuNav } from '../ui/MenuNav.js';
 import { Sound } from '../audio/Sound.js';
 import { clamp } from '../core/math.js';
 
@@ -112,6 +113,8 @@ export class Game {
         }
       },
     });
+    // ゲームパッド・キーボードでのメニュー操作
+    this.menuNav = new MenuNav(this.screens, () => this.sound.play('move'));
     this.best = loadBest();
     this.time = 0;
     this.last = performance.now();
@@ -367,21 +370,22 @@ export class Game {
   step(dt) {
     this.input.update(dt);
     const inp = this.input;
-    if (inp.pausePressed) {
+    const m = inp.menu;
+    const inMenu = this.state === 'title' || this.state === 'paused' || this.state === 'result';
+    // ゲームパッドの Start は、ゲーム中とポーズ中はポーズの切り替え、タイトルとリザルトでは決定
+    const startAsOk = (this.state === 'title' || this.state === 'result') && m.start;
+    const resultReady = this.state !== 'result' || this.time - this.resultAt > 1.0;
+    // もどる：Esc / P / Start、メニューでは B / Backspace も
+    const back = (inp.pausePressed && !startAsOk) || (inMenu && m.back);
+    if (back) {
       // ポーズ中に「設定」「あそびかた」を開いているときは、まずそれだけを閉じる
       if (this.state === 'paused' && this.screens.modalStack.length > 1) this.screens.closeModal();
       else if (this.state === 'playing' || this.state === 'paused' || this.state === 'countdown') this.togglePause();
       else if (this.screens.anyModal() && this.state === 'title') this.screens.closeModal();
+      else if (this.state === 'result' && resultReady) this.toTitle();
     }
-    if (this.state === 'result' && this.time - this.resultAt > 1.0) {
-      if (inp.confirmPressed) this.startGame(this.mode);
-      else if (inp.pausePressed) this.toTitle();
-    }
-    if (this.state === 'title' && inp.confirmPressed && !this.screens.anyModal()) {
-      this.sound.init();
-      this.sound.setVolumes(this.volumes.music, this.volumes.sfx);
-      this.startGame('arcade');
-    }
+    // メニューの項目を選んで決定（タイトルの既定は「配達スタート」、リザルトは「もう一度」）
+    this.menuNav.update(inMenu && !back ? { ...m, ok: m.ok || startAsOk } : null, this.state, resultReady);
     if (this.state === 'paused') {
       inp.endFrame();
       return;

@@ -224,6 +224,10 @@ export class Sound {
       case 'ui':
         this.tone('triangle', 880, 1320, 0.07, 0.1);
         break;
+      case 'move':
+        // メニューで項目を移したとき
+        this.tone('triangle', 700, 780, 0.035, 0.06);
+        break;
       case 'bump':
         this.tone('triangle', 520, 300, 0.12, 0.12);
         break;
