@@ -402,6 +402,8 @@ function addAwning(mb, b, col) {
   col.add({ kind: 'bounce', minX: Math.min(px0, px1), maxX: Math.max(px0, px1), minZ: Math.min(pz0, pz1), maxZ: Math.max(pz0, pz1), minY: yLow - 0.3, maxY: yLow + 0.18, bounce: 14.5, tag: 'awning' });
 }
 
+const BALCONY_D = 1.1; // ベランダの奥行き（壁から手すりまで）
+
 function addBalconies(mb, b, col) {
   const f = faceInfo(b)[b.front];
   const L = Math.hypot(f.c[0] - f.a[0], f.c[1] - f.a[1]);
@@ -414,7 +416,7 @@ function addBalconies(mb, b, col) {
   const rail = rgb('#8c8680');
   for (let k = 1; k < floors; k++) {
     const y = b.y0 + k * b.floorH;
-    const d = 1.1;
+    const d = BALCONY_D;
     const x0 = f.a[0] + tx * 0.8;
     const z0 = f.a[1] + tz * 0.8;
     const x1 = f.c[0] - tx * 0.8 + nx * d;
@@ -463,11 +465,19 @@ function addSign(mb, b, atlas) {
   const tx = (f.c[0] - f.a[0]) / L;
   const tz = (f.c[1] - f.a[1]) / L;
   const r = atlas.rect(b.sign, b.signIcon, b.style);
-  const w = Math.min(L - 1.2, 5.6);
-  const h = w / r.aspect;
-  const mx = (f.a[0] + f.c[0]) / 2 + f.n[0] * 0.09;
-  const mz = (f.a[1] + f.c[1]) / 2 + f.n[2] * 0.09;
-  const yc = b.style === 'shop' ? b.y0 + 3.95 : b.style === 'glass' || b.style === 'office' ? b.y0 + 5.2 : b.y0 + 3.2;
+  let w = Math.min(L - 1.2, 5.6);
+  let h = w / r.aspect;
+  let off = 0.09;
+  let yc = b.style === 'shop' ? b.y0 + 3.95 : b.style === 'glass' || b.style === 'office' ? b.y0 + 5.2 : b.y0 + 3.2;
+  if (b.balcony) {
+    // ベランダのある建物（アパート）は、壁に貼ると 2 階のベランダの床と手すりに隠れるので、その手すりの前面に付ける
+    h = Math.min(0.84, (L - 2.4) / r.aspect);
+    w = h * r.aspect;
+    off = BALCONY_D + 0.03;
+    yc = b.y0 + b.floorH + 0.51;
+  }
+  const mx = (f.a[0] + f.c[0]) / 2 + f.n[0] * off;
+  const mz = (f.a[1] + f.c[1]) / 2 + f.n[2] * off;
   const y0 = yc - h / 2;
   const y1 = yc + h / 2;
   mb.quad(

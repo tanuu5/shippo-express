@@ -750,9 +750,11 @@ button {
   color: #fff;
   text-shadow: 0 6px 0 var(--brown), 5px 0 0 var(--brown), -5px 0 0 var(--brown), 0 -5px 0 var(--brown);
   pointer-events: none;
+  /* left: 50% だと幅が画面の半分に縮むので、折り返さないようにする（縦向きスマホで「スタート！」が崩れていた） */
+  white-space: nowrap;
 }
 .countdown.go {
-  font-size: 84px;
+  font-size: min(84px, 17vw);
   color: #ffd2e2;
 }
 .countdown.pop {
@@ -914,6 +916,20 @@ button {
   .hud-timer {
     padding: 2px 12px 3px;
     min-width: 76px;
+  }
+  /* 画面中央の文字は折り返さないぶん、狭い画面では幅に合わせて小さくする（長い店名や「タイムアップ！」がはみ出さないように） */
+  .center-msg {
+    font-size: min(30px, 7.4vw);
+  }
+  .center-msg small {
+    font-size: min(18px, 4.6vw);
+  }
+  .center-msg .big,
+  .center-msg.timeup .big {
+    font-size: min(52px, 12.5vw);
+  }
+  .center-msg .rate {
+    font-size: min(34px, 8.4vw);
   }
 }
 @media (max-width: 400px) {
