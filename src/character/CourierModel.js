@@ -95,7 +95,6 @@ export class CourierModel {
       skin: toonMat(PALETTE.skin),
       vcol: toonMat(0xffffff, { vertexColors: true }),
       tights: toonMat(PALETTE.tights),
-      shorts: toonMat(PALETTE.shorts),
       coat: toonMat(PALETTE.coat),
       under: toonMat(PALETTE.undershirt),
       hair: toonMat(0xffffff, { vertexColors: true }),
@@ -236,16 +235,12 @@ export class CourierModel {
       const cm = this._mesh('cuff' + s, cuff, toonMat(PALETTE.coat, { side: THREE.DoubleSide }), j['elbow' + s]);
       cm.userData.noShadow = true;
       this._mesh('hand' + s, makeHand(sg), M.vcol, j['wrist' + s]);
-      // ショートパンツの裾（ゆったりしたキュロット風）
-      const leg = new THREE.CylinderGeometry(0.066, 0.072, 0.085, 20, 1, true);
-      leg.translate(0, -0.035, 0);
-      const lm = this._mesh('shortsLeg' + s, leg, toonMat(PALETTE.shorts, { side: THREE.DoubleSide }), j['thigh' + s]);
-      lm.userData.noShadow = true;
     }
-    // 腰まわり（下がふくらみすぎないよう、上下につぶした形）
+    // 腰まわり：タイツが腰まで続く（裾の下から見えても脚と同じ色でつながる）
+    // 下がふくらみすぎないよう、上下につぶした形
     const pelvis = ellipsoid(0.1, 0.075, 0.084, 24, 16);
     pelvis.translate(0, 0.03, -0.004);
-    this._mesh('shorts', pelvis, M.shorts, j.hips);
+    this._mesh('pelvis', pelvis, M.tights, j.hips);
     // 胴（ほぼポンチョの中）
     const torso = ellipsoid(0.085, 0.16, 0.068, 20, 14);
     torso.translate(0, -0.01, 0);
