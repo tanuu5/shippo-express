@@ -19,6 +19,7 @@ export const PALETTE = {
   paw: 0xa98a83, // #b4938b
   metal: 0xb3aaa6,
   undershirt: 0xb59a92,
+  shorts: 0xc2a89f,
   tights: 0x645257, // #5a4a4d（トゥーンの暗部で沈むぶん明るめ）
   bootCream: 0xf1e6e1, // #f0e4e1
   bootSole: 0x977d76, // #977d76

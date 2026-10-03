@@ -95,6 +95,7 @@ export class CourierModel {
       skin: toonMat(PALETTE.skin),
       vcol: toonMat(0xffffff, { vertexColors: true }),
       tights: toonMat(PALETTE.tights),
+      shorts: toonMat(PALETTE.shorts),
       coat: toonMat(PALETTE.coat),
       under: toonMat(PALETTE.undershirt),
       hair: toonMat(0xffffff, { vertexColors: true }),
@@ -235,12 +236,18 @@ export class CourierModel {
       const cm = this._mesh('cuff' + s, cuff, toonMat(PALETTE.coat, { side: THREE.DoubleSide }), j['elbow' + s]);
       cm.userData.noShadow = true;
       this._mesh('hand' + s, makeHand(sg), M.vcol, j['wrist' + s]);
+      // ショートパンツの裾（ゆったりしたキュロット風）
+      // 上端は太ももの丸い付け根（関節の上 0.04）より高くして、タイツがのぞかないようにする
+      const leg = new THREE.CylinderGeometry(0.068, 0.072, 0.13, 20, 1, true);
+      leg.translate(0, -0.0125, 0);
+      const lm = this._mesh('shortsLeg' + s, leg, toonMat(PALETTE.shorts, { side: THREE.DoubleSide }), j['thigh' + s]);
+      lm.userData.noShadow = true;
     }
-    // 腰まわり：タイツが腰まで続く（裾の下から見えても脚と同じ色でつながる）
-    // 下がふくらみすぎないよう、上下につぶした形
-    const pelvis = ellipsoid(0.1, 0.075, 0.084, 24, 16);
-    pelvis.translate(0, 0.03, -0.004);
-    this._mesh('pelvis', pelvis, M.tights, j.hips);
+    // 腰まわり（下がふくらみすぎないよう、上下につぶした形）
+    // 下端を股下まで下げ、左右の裾とすき間なくつながるようにする
+    const pelvis = ellipsoid(0.104, 0.082, 0.086, 24, 16);
+    pelvis.translate(0, 0.02, -0.004);
+    this._mesh('shorts', pelvis, M.shorts, j.hips);
     // 胴（ほぼポンチョの中）
     const torso = ellipsoid(0.085, 0.16, 0.068, 20, 14);
     torso.translate(0, -0.01, 0);
