@@ -60,6 +60,9 @@ const VIEWS = {
   hem: { pos: [0.12, 0.62, 1.5], target: [0, 0.62, 0], fov: 22 },
   hemLow: { pos: [-0.25, 0.42, 1.3], target: [0, 0.64, 0], fov: 24 },
   hemQ: { pos: [0.9, 0.85, 1.6], target: [0, 0.62, 0], fov: 22 },
+  // 裾の中を下から見上げる（股まわりのつながりの確認用）
+  under: { pos: [0.03, 0.2, 0.95], target: [0, 0.74, 0], fov: 44 },
+  underQ: { pos: [0.55, 0.22, 0.75], target: [0, 0.72, 0], fov: 44 },
 };
 function setView(name) {
   const v = VIEWS[name];

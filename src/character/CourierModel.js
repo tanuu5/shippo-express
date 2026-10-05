@@ -6,6 +6,7 @@ import { createFaceTextures, FACE_UV } from './faceTexture.js';
 import { buildHair } from './Hair.js';
 import { Poncho } from './Poncho.js';
 import { Tail } from './Tail.js';
+import { Shorts } from './Shorts.js';
 import { buildBootGeometry } from './Boots.js';
 
 // 参照画像の子（ケモ耳・ポンチョの配達員）をコードだけで組んだモデル。
@@ -236,18 +237,11 @@ export class CourierModel {
       const cm = this._mesh('cuff' + s, cuff, toonMat(PALETTE.coat, { side: THREE.DoubleSide }), j['elbow' + s]);
       cm.userData.noShadow = true;
       this._mesh('hand' + s, makeHand(sg), M.vcol, j['wrist' + s]);
-      // ショートパンツの裾（ゆったりしたキュロット風）
-      // 上端は太ももの丸い付け根（関節の上 0.04）より高くして、タイツがのぞかないようにする
-      const leg = new THREE.CylinderGeometry(0.068, 0.072, 0.13, 20, 1, true);
-      leg.translate(0, -0.0125, 0);
-      const lm = this._mesh('shortsLeg' + s, leg, toonMat(PALETTE.shorts, { side: THREE.DoubleSide }), j['thigh' + s]);
-      lm.userData.noShadow = true;
     }
-    // 腰まわり（下がふくらみすぎないよう、上下につぶした形）
-    // 下端を股下まで下げ、左右の裾とすき間なくつながるようにする
-    const pelvis = ellipsoid(0.104, 0.082, 0.086, 24, 16);
-    pelvis.translate(0, 0.02, -0.004);
-    this._mesh('shorts', pelvis, M.shorts, j.hips);
+    // ショートパンツ（ゆったりしたキュロット風）：腰から股を通って左右の裾まで一枚でつなぐ
+    // 上端は胴の中に入れ、裾は太ももの動きについていく
+    this.shorts = new Shorts(toonMat(PALETTE.shorts, { side: THREE.DoubleSide }));
+    j.hips.add(this.shorts.mesh);
     // 胴（ほぼポンチョの中）
     const torso = ellipsoid(0.085, 0.16, 0.068, 20, 14);
     torso.translate(0, -0.01, 0);
@@ -577,6 +571,8 @@ export class CourierModel {
     this.capsules[4].b.copy(tp[1]).applyMatrix4(chestInv);
     this.capsules[5].a.copy(tp[1]).applyMatrix4(chestInv);
     this.capsules[5].b.copy(tp[2]).applyMatrix4(chestInv);
+
+    this.shorts.update(j.thighL, j.thighR);
 
     this.poncho.update({
       dt,
